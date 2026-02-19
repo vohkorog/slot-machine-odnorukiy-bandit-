@@ -2,31 +2,79 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <title>Однорукий бандит</title>
+    <title>Однорукий бандит (с картинками)</title>
     <link rel="stylesheet" href="/static/style.css">
+    <style>
+        .reel-image {
+            width: 90px !important;
+            height: 90px !important;
+            object-fit: contain !important;
+        }
+    </style>
 </head>
 <body>
     <div class="machine">
         <div class="reels">
-            <div class="reel" id="reel1">?</div>
-            <div class="reel" id="reel2">?</div>
-            <div class="reel" id="reel3">?</div>
+            <div class="reel" id="reel1">
+                <img id="img1" class="reel-image" src="" alt="slot symbol">
+            </div>
+            <div class="reel" id="reel2">
+                <img id="img2" class="reel-image" src="" alt="slot symbol">
+            </div>
+            <div class="reel" id="reel3">
+                <img id="img3" class="reel-image" src="" alt="slot symbol">
+            </div>
         </div>
-        <button id="lever">Дернуть рычаг</button>
+        <button id="lever">💪 Дернуть рычаг</button>
+        <p id="message">Нажми на рычаг!</p>
     </div>
 
     <script>
+        const img1 = document.getElementById('img1');
+        const img2 = document.getElementById('img2');
+        const img3 = document.getElementById('img3');
         const reel1 = document.getElementById('reel1');
         const reel2 = document.getElementById('reel2');
         const reel3 = document.getElementById('reel3');
         const leverButton = document.getElementById('lever');
         const messageDisplay = document.getElementById('message');
 
+        const SYMBOLS = [
+            "/static/images/apilsin.png",
+            "/static/images/bell.png",
+            "/static/images/fire.png",
+            "/static/images/podkova.png",
+            "/static/images/seven.png",
+            "/static/images/strawberry.png",
+            "/static/images/vishnya.png",
+            "/static/images/watermelon.png",
+        ];
+
+
         function startSpinAnimation() {
             reel1.classList.add('reel-spin');
             reel2.classList.add('reel-spin');
             reel3.classList.add('reel-spin');
+            messageDisplay.textContent = ' Пошла круточка! ';
             leverButton.disabled = true;
+            
+            startFakeSpin();
+        }
+
+        function startFakeSpin() {
+            const interval = setInterval(() => {
+                if (!leverButton.disabled) {
+                    clearInterval(interval);
+                    return;
+                }
+                
+                img1.src = SYMBOLS[Math.floor(Math.random() * SYMBOLS.length)];
+                img2.src = SYMBOLS[Math.floor(Math.random() * SYMBOLS.length)];
+                img3.src = SYMBOLS[Math.floor(Math.random() * SYMBOLS.length)];
+            }, 100);
+            
+            // Запоминаем interval чтобы остановить потом
+            window.spinInterval = interval;
         }
 
         function stopSpinAnimation() {
@@ -34,6 +82,10 @@
             reel2.classList.remove('reel-spin');
             reel3.classList.remove('reel-spin');
             leverButton.disabled = false;
+            
+            if (window.spinInterval) {
+                clearInterval(window.spinInterval);
+            }
         }
 
         async function callPythonSpin() {
@@ -44,21 +96,36 @@
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({}) 
+                    }
                 });
                 
+                if (!response.ok) {
+                    throw new Error('Ошибка сервера');
+                }
                 
                 const data = await response.json();
                 
                 if (data.success) {
-                    reel1.textContent = data.reels[0];
-                    reel2.textContent = data.reels[1];
-                    reel3.textContent = data.reels[2];
-                    messageDisplay.textContent = data.message;
-                }                 
-            } finally {
+                    // Останавливаем анимацию и устанавливаем финальные картинки
+                    setTimeout(() => {
+                        stopSpinAnimation();
+                        img1.src = data.images[0];
+                        img2.src = data.images[1];
+                        img3.src = data.images[2];
+                        messageDisplay.textContent = data.message;
+                    }, 800);  // 0.8 секунды вращения
+                    
+                } else {
+                    throw new Error(data.error || 'Неизвестная ошибка');
+                }
+                
+            } catch (error) {
+                console.error('Ошибка:', error);
                 stopSpinAnimation();
+                messageDisplay.textContent = '😵 Ошибка соединения с Python!';
+                img1.src = '';
+                img2.src = '';
+                img3.src = '';
             }
         }
 

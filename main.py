@@ -30,6 +30,7 @@ async def spin():
     return JSONResponse({
             "success": True,
             "reels": result["reels"],
+            "images":result["images"],
             "message": result["message"],
             "win": result["win"]
         })
