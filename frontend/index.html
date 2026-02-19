@@ -2,7 +2,7 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <title>Однорукий бандит (с картинками)</title>
+    <title>Однорукий бандит</title>
     <link rel="stylesheet" href="/static/style.css">
     <style>
         .reel-image {
@@ -25,7 +25,7 @@
                 <img id="img3" class="reel-image" src="" alt="slot symbol">
             </div>
         </div>
-        <button id="lever">💪 Дернуть рычаг</button>
+        <button id="lever">Дернуть рычаг</button>
         <p id="message">Нажми на рычаг!</p>
     </div>
 
@@ -73,7 +73,6 @@
                 img3.src = SYMBOLS[Math.floor(Math.random() * SYMBOLS.length)];
             }, 100);
             
-            // Запоминаем interval чтобы остановить потом
             window.spinInterval = interval;
         }
 
@@ -122,7 +121,6 @@
             } catch (error) {
                 console.error('Ошибка:', error);
                 stopSpinAnimation();
-                messageDisplay.textContent = '😵 Ошибка соединения с Python!';
                 img1.src = '';
                 img2.src = '';
                 img3.src = '';
