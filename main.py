@@ -3,7 +3,6 @@ from fastapi.responses import FileResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
 import uvicorn
-import os
 from logic import spin_reels
 
 app = FastAPI()
@@ -30,6 +29,7 @@ async def spin():
     return JSONResponse({
             "success": True,
             "reels": result["reels"],
+            "images":result["images"],
             "message": result["message"],
             "win": result["win"]
         })
